@@ -150,6 +150,7 @@ rfxtrx.initialise(function () {
                 </section>
 
                 <section>
+                  <section>
                     <h2>Protocol</h2>
                     <pre>
 Send a 14 byte Interface command – Reset packet (hex 0D 00 00 00 00 00 00 00 00 00 00 00 00 00)
@@ -164,6 +165,58 @@ If necessary send a select frequency selection command. The 433.92MHz transceive
 
 The RFXtrx is now ready to receive RF data and to receive commands from the application for the transmitter.
                     </pre>
+                  </section>
+                  <section>
+                    <pre>
+                      <code data-trim class="javascript">
+// This is a buffering parser which accumulates bytes until it receives the
+// number of bytes specified in the first byte of the message.
+// It relies on a flushed buffer, to ensure the first byte corresponds to the
+// size of the first message.
+// The 'data' message emitted has all the bytes from the message.
+self.rfxtrxParser = function() {
+    var data = [],
+        requiredBytes = 0;
+    return function(emitter, buffer) {
+        // Collect data
+        data.push.apply(data, buffer);
+        if (requiredBytes === 0) {
+            requiredBytes = data[0] + 1;
+        }
+        if (data.length >= requiredBytes) {
+            emitter.emit("data", data.slice(0, requiredBytes));
+            data = data.slice(requiredBytes);
+            requiredBytes = 0;
+        }
+    };
+};
+                      </code>
+                    </pre>
+                  </section>
+                  <section>
+                    <pre>
+                      <code data-trim class="javascript">
+RfxCom.prototype.security1Handler = function(data) {
+    var self = this,
+        subtype = data[0],
+        seqnbr = data[1],
+        id = "0x" + self.dumpHex(data.slice(2, 5), false).join(""),
+        deviceStatus = data[5] & ~0x80,
+        batterySignalLevel = data[6],
+        evt = {
+            subtype: subtype,
+            id: id,
+            deviceStatus: deviceStatus,
+            batteryLevel: batterySignalLevel & 0x0f,
+            rssi: batterySignalLevel >> 4,
+            tampered: data[5] & 0x80
+        };
+
+    self.emit("security1", evt);
+};
+                      </code>
+                    </pre>
+                  </section>
                 </section>
 
 
@@ -327,6 +380,9 @@ rfxtrx.initialise(function () {
                   <section>
                     <div id="power" style="height: 600px; width: 1024px; background: white"></div>
                   </section>
+                  <section>
+                    <div id="power2" style="height: 600px; width: 1024px; background: white"></div>
+                  </section>
                 </section>
 
                 <section>
@@ -354,12 +410,26 @@ rfxtrx.initialise(function () {
                 </section>
 
                 <section>
+                  <section>
                     <h2>What's Supported?</h2>
+                  </section>
+                  <section>
+                    <h2>Lighting</h2>
                     <ul>
-                        <li>LightwaveRF - available from B&amp;Q as Siemens</li>
-                        <li>TODO - weather monitoring</li>
-                        <li>TODO - PIR</li>
+                      <li>X10, ARC, ELRO, Waveman, EMW200, IMPULS, RisingSun, Philips (control coming soon)</li>
+                      <li>AC, HomeEasy EU, ANSLUT</li>
+                      <li>LightwaveRF, Siemens, EMW100, BBSB, MDREMOTE, RSL2, Livolo, RGB</li>
                     </ul>
+                  </section>
+                  <section>
+                    <h2>Other sensors</h2>
+                    <ul>
+                      <li>OWL CM119/160/180 electricity monitors</li>
+                      <li>X10, KD101, Visonic (433Mhz only), Meiantech, SA30 security sensors</li>
+                      <li>Oregon Scientific temperature and humidity sensors</li>
+                      <li>Oregon Scientific digital scales (BWR101/102 and GR102)
+                    </ul>
+                  </section>
                 </section>
 
                 <section>
@@ -436,9 +506,6 @@ describe('.switchOn', function(){
 
               <section>
                 <section><h2>Why Node.js</h2></section>
-                <section><h2>Python programmer</h2></section>
-                <section><h2>Events!</h2></section>
-                <section><h2>Twisted</h2></section>
               </section>
 
                 <section>

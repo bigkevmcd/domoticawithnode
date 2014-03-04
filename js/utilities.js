@@ -66,3 +66,26 @@ d3.csv("humidity.csv", function(error, data) {
                         .config({yAxisUnit: ' %', width: 780, height: 580})
                         .render('#humidity');
 });
+
+d3.csv("power2.csv", function(error, data) {
+  data.forEach(function(d) {
+     d.timestamp = parseDate(d.timestamp);
+     d.current = +d.current;
+  });
+  var dataSources = [
+    {
+     id: 'power-timeline',
+     title: 'kw/h',
+     dimensions: {
+        x: 'timestamp',
+        y: 'current',
+     },
+     data: data
+   }
+  ];
+  var timelineGraph = glimpse.graphBuilder.create('line')
+                        .data(dataSources)
+                        .config({yAxisUnit: ' kw/h', width: 780, height: 580})
+                        .render('#power2');
+});
+
