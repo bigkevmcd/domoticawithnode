@@ -329,10 +329,10 @@ lighting1.chime('C14');
                         <code data-trim class="javascript">
 var SunCalc = require('suncalc'), moment = require('moment');
 
-var turnLightsFullOn = function () {
+var turnLightsFiftyPercent = function () {
   var times = SunCalc.getTimes(moment(), 55.858, -4.259);
-  if (times.sunrise > moment().subtract('minutes', 5)) {
-    lightwave.switchOn('0xFAC271/1', {level: 0x1F});
+  if (times.sunrise > new Date()) {
+    lightwave.switchOn('0xFAC271/1', {level: 0x10});
   }
 };
 
@@ -341,10 +341,10 @@ var job = new cronJob('00 55 06 * * 1-5', turnLightsFullOn, null, true);
 
 rfxtrx.initialise(function (error) { if (error) { throw new Error('Unable to initialise the rfx device'); }; });
 
-var turnLightsFiftyPercent = function () {
+var turnLightsFullOn = function () {
   var times = SunCalc.getTimes(moment(), 55.858, -4.259);
-  if (times.sunrise > new Date()) {
-    lightwave.switchOn('0xFAC271/1', {level: 0x10});
+  if (times.sunrise > moment().subtract('minutes', 5)) {
+    lightwave.switchOn('0xFAC271/1', {level: 0x1F});
   }
 };
                         </code>
@@ -510,7 +510,6 @@ describe('.switchOn', function(){
 
                 <section>
                     <h1>THE END</h1>
-                    <h3>BY Kevin McDermott</h3>
                 </section>
             </div>
         </div>
